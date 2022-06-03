@@ -8,6 +8,7 @@
 1) Descrierea Temei
 
 Proiectul are ca scop realizarea unui procesor de imagini performant folosind biblioteca LodePNG si algoritmi de prelucrare a imagini pentru a realiza o aplicatie de procesare a imaginilor
+
 2) Surse si imbunatatiri aduse
 
 Proiectul se bazeaza in jurul utilitarei LodePNG, biblioteca folosita pentru citirea si scrierea imaginilor PDF.

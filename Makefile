@@ -1,7 +1,7 @@
 # pentru C/ASM: make c_asm
-c_asm: image_processor.c lodepng.c lodepng.h to_gray_asm.asm
-	uasm247_osx/uasm -f macho -q to_gray_asm.asm
-	gcc -O2 image_processor.c lodepng.c to_gray_asm.o -o to_gray -ggdb3
+c_asm: image_processor.c lodepng.c lodepng.h horizontal_flip_asm.asm
+	uasm247_osx/uasm -macho64 -q horizontal_flip_asm.asm
+	gcc -O2 image_processor.c lodepng.c horizontal_flip_asm.o -o horizontal_flip_asm -ggdb3
 
 # pentru C fără ASM: make c
 c: image_processor.c lodepng.c lodepng.h
@@ -20,3 +20,4 @@ cpp: image_processor.cpp lodepng.cpp lodepng.h
 
 clean:
 	rm -f to_gray *.o *.s
+ 

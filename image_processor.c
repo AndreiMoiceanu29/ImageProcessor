@@ -28,7 +28,8 @@ freely, subject to the following restrictions:
 #include <stdio.h>
 #include <stdlib.h>
 //extern void to_gray_asm(unsigned char* , int, int);
-
+extern void horizontal_flip_asm(unsigned char* , int, int);
+extern void vertical_flip_asm(unsigned char* , int, int);
 /*
 3 ways to encode a PNG from RGBA pixel data to a file (and 2 in-memory ways).
 NOTE: these samples overwrite the file or test.png without warning!
@@ -116,7 +117,18 @@ void to_gray(unsigned char * image, int width, int height)
             } 
       }
 }
-
+void copy(unsigned char *src, unsigned char *dst, int width, int height){
+  // Copy the image from src to dst
+  for (int y = 0; y < height; y++)
+  {
+    for (int x = 0; x < width; x++)
+    {
+      dst[4 * width * y + 4 * x + 0] = src[4 * width * y + 4 * x + 0];
+      dst[4 * width * y + 4 * x + 1] = src[4 * width * y + 4 * x + 1];
+      dst[4 * width * y + 4 * x + 2] = src[4 * width * y + 4 * x + 2];
+    }
+  }
+}
 float computeFloatingPointPixelValue(unsigned char pixel){
   float f = pixel / 255.0;
 
@@ -124,32 +136,40 @@ float computeFloatingPointPixelValue(unsigned char pixel){
   return f;
 }
 
-int computeIntegerPixelValue(float  pixel){
+unsigned char computeIntegerPixelValue(float  pixel){
   float i = pixel * 255;
   //i = i % 256;
-  return (int)i;
+  if(i < 0){
+    i = 0;
+  }
+  if(i > 255){
+    i = 255;
+  }
+  return (unsigned char)i;
 }
 
 void convolution(unsigned char *image, int width, int height, float **kernel, int kernel_size)
 {
+    unsigned char* image_copy = (unsigned char*)malloc(width * height * 4 * sizeof(unsigned char));
+    copy(image, image_copy, width, height);
       int kernel_half = kernel_size / 2;
       for (int y = 0; y < height; y++)
       {
             for (int x = 0; x < width; x++)
             {
                 float r = 0.0f, g = 0.0f, b = 0.0f;
-                for (int i = -kernel_half; i < kernel_half; i++)
+                for (int i = -kernel_half; i <= kernel_half; i++)
                 {
-                    for (int j = -kernel_half; j < kernel_half; j++)
+                    for (int j = -kernel_half; j <= kernel_half; j++)
                     {
                         int x_ = x  - i;
                         int y_ = y  - j;
                         if (x_ < 0 || x_ >= width || y_ < 0 || y_ >= height)
                             continue;
                         //printf("%d %d\n", x_, y_);
-                        r += computeFloatingPointPixelValue(image[4 * width * y_ + 4 * x_ + 0]) * kernel[i + kernel_half][j + kernel_half];
-                        g += computeFloatingPointPixelValue(image[4 * width * y_ + 4 * x_ + 1]) * kernel[i + kernel_half][j + kernel_half];
-                        b += computeFloatingPointPixelValue(image[4 * width * y_ + 4 * x_ + 2]) * kernel[i + kernel_half][j + kernel_half];
+                        r += computeFloatingPointPixelValue(image_copy[4 * width * y_ + 4 * x_ + 0]) * kernel[i + kernel_half][j + kernel_half];
+                        g += computeFloatingPointPixelValue(image_copy[4 * width * y_ + 4 * x_ + 1]) * kernel[i + kernel_half][j + kernel_half];
+                        b += computeFloatingPointPixelValue(image_copy[4 * width * y_ + 4 * x_ + 2]) * kernel[i + kernel_half][j + kernel_half];
                     }
                 }
                 image[4 * width * y + 4 * x + 0] = computeIntegerPixelValue(r);
@@ -202,18 +222,7 @@ void verticalFlip(unsigned char *image, int width, int height)
       }
 }
 
-void copy(unsigned char *src, unsigned char *dst, int width, int height){
-  // Copy the image from src to dst
-  for (int y = 0; y < height; y++)
-  {
-    for (int x = 0; x < width; x++)
-    {
-      dst[4 * width * y + 4 * x + 0] = src[4 * width * y + 4 * x + 0];
-      dst[4 * width * y + 4 * x + 1] = src[4 * width * y + 4 * x + 1];
-      dst[4 * width * y + 4 * x + 2] = src[4 * width * y + 4 * x + 2];
-    }
-  }
-}
+
 
 void add(unsigned char *src, unsigned char *dst, int width, int height){
   // Add the image from src to dst
@@ -264,7 +273,7 @@ void edgeDetection(unsigned char *src, unsigned char* dst, int width, int height
   sobelY[2][2] = 1.0f;
   unsigned char* image_copy = (unsigned char*)malloc(width * height * 4 * sizeof(unsigned char));
   copy(src, image_copy, width, height);
-  convolution(src,width,height,sobelY,3);
+  convolution(src,width,height,sobelX,3);
   convolution(image_copy,width,height,sobelY,3);
   add(src, image_copy, width, height);
   copy(image_copy, dst, width, height);
@@ -330,12 +339,14 @@ int main(int argc, char *argv[]) {
   printf("3. Sharpen\n");
   printf("4 Gray Scale\n");
   printf("5. Vertical Flip\n");
+  printf("6. Edge detection\n");
   scanf("%d", &option);
   switch(option){
     case 1:{
       clock_t start = clock();
-      copy(image, image_copy, width, height);
-      horizontalFlip(image,width,height);
+      //copy(image, image_copy, width, height);
+      //horizontalFlip(image,width,height);
+      horizontal_flip_asm(image,width,height);
       clock_t end = clock();
       double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
       printf("Time spent: %f\n s", time_spent);
@@ -373,6 +384,15 @@ int main(int argc, char *argv[]) {
       clock_t end5 = clock();
       double time_spent = (double)(end5 - start5) / CLOCKS_PER_SEC;
       printf("Time spent: %f\n s", time_spent);
+      break;
+    }
+    case 6:{
+      clock_t start6 = clock();
+      edgeDetection(image,image_copy,width,height);
+      copy(image_copy,image,width,height);
+      clock_t end6 = clock();
+      double time_spent6 = (double)(end6 - start6) / CLOCKS_PER_SEC;
+      printf("Time spent: %f\n s", time_spent6);
       break;
     }
     default:
