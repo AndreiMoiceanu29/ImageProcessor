@@ -41,16 +41,16 @@ horizontal_flip proc SYSTEMV uses RBX RSI RDI,          ; Windows: fără SYSTEM
         add r8, RAX
         mov r15, r8
         add r15, 1
-        mov r16, r8
-        add r16, 2
-        mov image[r12], image[r8]
-        mov image[r8], al
+        mov RCX, r8
+        add RCX, 2
+        mov [image + r12], [image + r8]
+        mov [image + r8], al
         mov al, image[r13]
-        mov image[r13], image[r15]
-        mov image[r15], al
-        mov al, image[r14]
-        mov image[r14], image[r16]
-        mov image[r16], al
+        mov [image+r13], [image+r15]
+        mov [image+r15], al
+        mov al, [image+r14]
+        mov [image+r14], [image+RCX]
+        mov [image+RCX], al
         .endfor
         ; Compute the second address 4*width*r10 + 4*r11 + 1
         ; Compute the third address 4*width*r10 + 4*r11 + 2
