@@ -1,6 +1,6 @@
 .code
-public horizontal_flip
-horizontal_flip proc SYSTEMV uses RBX RSI RDI,          ; Windows: fără SYSTEMV
+public vertical_flip
+vertical_flip proc SYSTEMV uses RBX RSI RDI,          ; Windows: fără SYSTEMV
        image:qword, im_width:qword, im_height:qword
 
     mov RAX, im_height
@@ -58,5 +58,5 @@ horizontal_flip proc SYSTEMV uses RBX RSI RDI,          ; Windows: fără SYSTEM
 
 
 
-horizontal_flip endp
+vertical_flip endp
 end
