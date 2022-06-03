@@ -13,6 +13,10 @@ Proiectul are ca scop realizarea unui procesor de imagini performant folosind bi
 Proiectul se bazeaza in jurul utilitarei LodePNG, biblioteca folosita pentru citirea si scrierea imaginilor PDF.
 Acesta se bazeaza pe laboratorul nr 6. Plecand de la acel cod de baza, s-a facut o aplicatie completa de procesare de imagini avand mai multe procese precum diverse convolutii, rotiri si schimbari de spatii de culoare.
 Aplicatia a fost gandita cu utilizarea alocarii dinamice. Utilizarea alocarii dinamice asigura ca memoria nu este umpluta degeaba si aduce un plus de performanta.
+
+Imbunatatiri aduse prin implementarea in limbaj de asamblare:
+ * Functiile Vertial Flip si Horizontal Flip: A fost optimizat calculul de adresa, facandu-se de 2 ori/iteratie fata de 12 ori in implementarea din C
+
 3) Descrierea aplicatiei
 
 Aplicatia este un procesor de imagini. Pentru a avea performanta inalta aplicatia este scrisa in C. Pentru un consum eficient de memorie, aplicatia a fost gandita cu alocare dinamica.
